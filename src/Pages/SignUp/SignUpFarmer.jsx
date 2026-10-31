@@ -1,23 +1,35 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import isValidEmail from "../../utils/validateEmail"
+import { cropsDetails } from "../../Server/crops"
 import "./SignUp.css"
 import { registerUserWithProfile } from "../../Server/server"
 import { useNavigate } from "react-router-dom"
+import GoogleMap from "../../Components/GoogleMap/googleMap"
+import getUserLocationWithFallback from "../../utils/getUserLocation"
 
 export default function SignUpFarmer(){
     const [step,setStep] = useState(1)
     const [email,setEmail] = useState("")
     const [password,setPassword] = useState("")
     const [error,setError] = useState("")
+    const [defaultCoords,setDefaultCoords] = useState(undefined)
     const [formData,setFormData] = useState({
         nameOfFarm:"",
         mobileNo:"",
         location:"",
         crop:"",
         harvestDate:"",
+        "coords":{},
         quantityAvailable:""
     })
+    const cropDets = cropsDetails[formData.crop]
     const navigate = useNavigate()
+
+     useEffect(() => {
+            getUserLocationWithFallback().then((loc) => {
+                setDefaultCoords(loc)
+            })
+        },[])
 
     const handleChange = (eventTarget) => {
         const {name, value} = eventTarget
@@ -45,9 +57,19 @@ export default function SignUpFarmer(){
             setStep(3)
             return
         }
+
+        if(step === 3){
+            setStep(4)
+            return
+        }
     }
 
     const handleBackBtn = () => {
+        if(step === 4){
+            setStep(3)
+            return
+        }
+
         if(step === 3){
             setStep(2)
             return
@@ -126,12 +148,39 @@ export default function SignUpFarmer(){
                 </div>
             }
             {
-                step === 3 && 
+                step === 3 && <div>
+                    <GoogleMap
+                        defaultPosition={defaultCoords}
+                        onPositionChange={(loc) => handleChange({"name":"coords","value":loc})}
+                    />
+                    <div className="actions">
+                        <button onClick={handleBackBtn}>
+                            back
+                        </button>
+                        <button onClick={handleNextStep}>
+                            next
+                        </button>
+                    </div>
+                    {error && <div>{error}</div>}
+                </div>
+            }
+
+            {
+                step === 4 && 
                 <div>
                     <div className="form-group">
-                        <label>Crop</label>
-                        <input type="text" placeholder="Enter Crop" name="crop" value={formData.crop} onChange={(e) => handleChange(e.target)}/>
-                    </div>
+					  <label htmlFor="crop-select">Choose a crop:</label>
+					  
+					  <select 
+						name="crop" 
+						id="crop-select" 
+						value={formData.crop || ""} 
+						onChange={(e) => handleChange(e.target)}
+					  >
+						<option value="">-- Please select a crop --</option>
+						<option value="cabbage">Cabbage</option>
+					  </select>
+					</div>
                     <div className="form-group">
                         <label>Harvest Date</label>
                         <input type="date" name="harvestDate" value={formData.harvestDate} onChange={(e) => handleChange(e.target)}/>
@@ -139,6 +188,7 @@ export default function SignUpFarmer(){
                     <div className="form-group">
                         <label>Quantity Available</label>
                         <input type="text" placeholder="Enter Quantity Available" value={formData.quantityAvailable} name="quantityAvailable" onChange={(e) => handleChange(e.target)}/>
+                        {cropsDetails[formData.crop]?.unit}
                     </div>
                     <div className="actions">
                         <button onClick={handleBackBtn}>

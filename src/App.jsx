@@ -10,6 +10,11 @@ import SplashScreen from "./Components/Loaders/SplashScreen"
 import ProtectedRoute from "./utils/ProtectedRoute"
 import RootRedirect from "./utils/RootRedirect"
 import LogIn from "./Pages/Login/Login"
+import SignUpTransportation from "./Pages/SignUp/SignUpTransportation"
+import MakeOrder from "./Pages/MakeOrder/MakeOrder"
+import BuyerOrderView from "./Pages/Order/BuyerOrderView"
+import FarmerOrderView from "./Pages/Order/FarmerOrderView"
+import TransporterOrderView from "./Pages/Order/TransporterOrderView"
 
 function App() {
   const [user,setUser] = useState(undefined)
@@ -29,10 +34,15 @@ function App() {
         <Route path="/signUp" element={<SignUp/>} />
         <Route path="/signUpFarmer" element={<SignUpFarmer/>}/>
         <Route path="/signUpBuyer" element={<SignUpBuyer/>}/>
+        <Route path="/signUpTransporter" element={<SignUpTransportation/>}/>
         <Route path="/login" element={<LogIn/>}/>
         <Route element={<ProtectedRoute user={user}/>}>
           <Route path="/userProfile/:id" element={<UserProfile/>}/>
           <Route path="/" element={<RootRedirect user={user}/>}/>
+          <Route path="/make-order/:id" element={<MakeOrder/>}/>
+          <Route path="/buyer-order-view/:id" element={<BuyerOrderView/>}/>
+          <Route path="/transporter-order-view/:id" element={<TransporterOrderView/>}/>
+          <Route path="/farmer-order-view/:id" element={<FarmerOrderView/>}/>
         </Route>
         
       </Routes>
